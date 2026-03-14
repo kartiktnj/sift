@@ -11,4 +11,4 @@ __pycache__/
 .env
 
 # HuggingFace cache
-.cache/
+cache/

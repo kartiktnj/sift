@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from transcript import get_transcript
 from summarizer import summarize_text
+from cache_manager import load_from_cache, save_to_cache
+
 
 app = Flask(__name__)
 
@@ -31,8 +33,14 @@ def summarize_route():
         return "Missing video_id parameter", 400
 
     try:
+        cached_result = load_from_cache(video_id, length)
+        if cached_result:
+            print("Cache hit!")
+            return jsonify(cached_result)
+        
         transcript = get_transcript(video_id)
         summary = summarize_text(transcript, max_summary_length=max_len, min_summary_length=min_len, top_ratio=top_ratio)
+        save_to_cache(video_id, length, summary)
         return jsonify(summary) 
     except Exception as e:
         return str(e), 500
